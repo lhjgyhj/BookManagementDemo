@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lhj.bookmanagementdemo.mapper.CategoryMapper">
+    <resultMap id="categoryMap" type="com.lhj.bookmanagementdemo.entity.Category">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="remark" column="remark"/>
+        <result property="pid" column="pid"/>
+        <result property="createtime" column="createtime"/>
+        <result property="updatetime" column="updatetime"/>
+        <collection property="children" column="id" ofType="com.lhj.bookmanagementdemo.entity.Category" select="selectByPid"/><!--prop java属性,ofType 声明集合中元素的类型为Category实体类。-->
+        
+    </resultMap>
+    <select id="selectByPid" resultType="com.lhj.bookmanagementdemo.entity.Category">
+        select * from category where pid=#{id}<!--自关联查询-->
+    </select>
+<update id="updateById">
+    update category set name=#{name},remark=#{remark},updatetime=#{updatetime} where id=#{id}
+</update>
+
+<delete id="deleteById">
+    delete from category where id=#{id} order by id asc
+</delete>
+<select id="list" resultType="com.lhj.bookmanagementdemo.entity.Category">
+    select * from category order by id asc
+</select>
+<select id="listByCondition" resultMap="categoryMap">
+    select c1.* from category c1
+    left join category c2
+    on c1.id = c2.pid
+    <where>
+        isnull(c1.pid)
+        <if test="name != null and name != ''">
+            and (c1.name like concat('%', #{name}, '%') or c2.name like concat('%', #{name}, '%'))
+        </if>
+    </where>
+    group by c1.id
+    order by c1.id asc
+</select>
+    <select id="save">
+insert into category(name,remark,pid) values(#{name},#{remark},#{pid})
+</select>
+    <select id="getById">
+select * from category where id=#{id}
+</select>
+</mapper>

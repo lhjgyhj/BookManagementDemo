@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lhj.bookmanagementdemo.mapper.BorrowMapper">
+    <select id="list" resultType="com.lhj.bookmanagementdemo.entity.Borrow">
+        select * from borrow
+        order by id asc
+    </select>
+    <update id="updateById">
+        update borrow set book_no= #{bookNo},book_name= #{bookName},user_name= #{userName},user_id= #{userId},user_phone= #{userPhone},score= #{score},updatetime= #{updatetime},status= #{status},return_date= #{returnDate},days= #{days} where id= #{id}
+    </update>
+    <delete id="deleteById">
+        delete from borrow where id= #{id}
+    </delete>
+    <select id="save">
+        insert into  borrow(book_no,book_name,user_name,user_id,user_phone,score,days,return_date) values (#{bookNo},#{bookName},#{userName},#{userId},#{userPhone},#{score},#{days},#{returnDate})
+    </select>
+    <select id="getById" resultType="com.lhj.bookmanagementdemo.entity.Borrow">
+        select * from borrow where id=#{id}
+    </select>
+    <select id="listByCondition" resultType="com.lhj.bookmanagementdemo.entity.Borrow">
+        select * from borrow
+        <where>
+            <if test="bookName != null and bookName  != ''">
+                and book_name like concat('%',#{bookName},'%')
+            </if>
+            <if test="bookNo != null and bookNo  != ''">
+                and book_no =#{bookNo}
+            </if>
+            <if test="userId != null and userId  != ''">
+            and user_id =#{userId}
+            </if>
+            <if test="userName != null and userName  != ''">
+                and user_name =#{userName}
+            </if>
+            <if test="userPhone != null and userPhone  != ''">
+                and user_phone =#{userPhone}
+            </if>
+
+        </where>
+        /*模糊查询，如果什么都不传，则查询所有*/
+        order by id asc
+    </select>
+    <select id="getCountByTimeRange">
+/*DATE_FORMAT(createtime, '%Y-%m-%d')把datetime类型的数据格式化成yyyy-MM-dd*/
+        select count(id) as count, DATE_FORMAT(createtime, '%Y-%m-%d') as date from
+        <if test= "type == 1">
+          borrow
+        </if>
+        <if test= "type == 2">
+          retur
+        </if>
+        where
+        <choose>
+            <when test="timeRange == 'week'">
+                createtime >= DATE_SUB(NOW(),INTERVAL 1 WEEK) /* --DATE_SUB  就是数据库进行时间计算的函数*/
+            </when>
+            <when test="timeRange == 'month'">
+                createtime >= DATE_SUB(NOW(),INTERVAL 1 MONTH)
+            </when>
+            <when test="timeRange == 'quarter'">
+                createtime >= DATE_SUB(NOW(),INTERVAL 3 MONTH)
+            </when>
+            <when test="timeRange == 'year'">
+                createtime >= DATE_SUB(NOW(),INTERVAL 12 MONTH)
+            </when>
+            <otherwise>
+                createtime > now()
+            </otherwise>
+        </choose>
+        group by date
+    </select>
+    <update id="renewBorrow">
+        update borrow set return_date= DATE_ADD(return_date, INTERVAL #{extendDays} DAY),updatetime= #{updatetime} where id= #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lhj.bookmanagementdemo.mapper.ReturMapper">
+    <update id="updateStatus">
+        update retur set status=#{status} where id=#{id}
+    </update>
+    <select id="listByCondition" resultType="com.lhj.bookmanagementdemo.entity.Retur">
+        select * from retur
+        <where>
+            <if test="bookName != null and bookName  != ''">
+                and book_name like concat('%',#{bookName},'%')
+            </if>
+            <if test="bookNo != null and bookNo  != ''">
+                and book_no =#{bookNo}
+            </if>
+            <if test="userId != null and userId  != ''">
+                and user_id =#{userId}
+            </if>
+            <if test="userName != null and userName  != ''">
+                and user_name =#{userName}
+            </if>
+            <if test="userPhone != null and userPhone  != ''">
+                and user_phone =#{userPhone}
+            </if>
+
+        </where>
+        /*模糊查询，如果什么都不传，则查询所有*/
+        order by real_date desc
+    </select>
+    <select id="save">
+        insert into  retur(book_no,book_name,user_name,user_id,user_phone,score,days,return_date,real_date) values (#{bookNo},#{bookName},#{userName},#{userId},#{userPhone},#{score},#{days},#{returnDate},#{realDate})
+    </select>
+    <delete id="deleteById">
+        delete from retur where id= #{id}
+    </delete>
+</mapper>
